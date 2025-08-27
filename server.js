@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -11,9 +12,35 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-// In-memory data storage (in production, use a database)
-let groups = {};
-let snipes = [];
+// Data storage with JSON file persistence
+const DATA_FILE = 'data.json';
+
+// Load data from file or initialize default
+let loadData = () => {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+      return {
+        groups: data.groups || {},
+        snipes: data.snipes || []
+      };
+    }
+  } catch (error) {
+    console.error('Error loading data:', error);
+  }
+  return { groups: {}, snipes: [] };
+};
+
+// Save data to file
+let saveData = (data) => {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('Error saving data:', error);
+  }
+};
+
+let { groups, snipes } = loadData();
 
 // Initialize with the Biryani Baes group and players from the image
 const initializeDefaultGroup = () => {
@@ -41,8 +68,11 @@ const initializeDefaultGroup = () => {
   };
 };
 
-// Initialize default data
-initializeDefaultGroup();
+// Initialize default data if no groups exist
+if (Object.keys(groups).length === 0) {
+  initializeDefaultGroup();
+  saveData({ groups, snipes });
+}
 
 // API Routes
 
@@ -75,6 +105,7 @@ app.post('/api/groups', (req, res) => {
     }
   };
   
+  saveData({ groups, snipes });
   res.status(201).json(groups[groupId]);
 });
 
@@ -97,6 +128,7 @@ app.post('/api/groups/:groupId/players', (req, res) => {
   };
   
   groups[groupId].players.push(newPlayer);
+  saveData({ groups, snipes });
   res.status(201).json(newPlayer);
 });
 
@@ -112,6 +144,7 @@ app.delete('/api/groups/:groupId/players/:playerId', (req, res) => {
     player => player.id !== playerId
   );
   
+  saveData({ groups, snipes });
   res.json({ message: 'Player removed successfully' });
 });
 
@@ -150,6 +183,7 @@ app.post('/api/snipes', (req, res) => {
   
   snipes.push(snipe);
   
+  saveData({ groups, snipes });
   res.status(201).json(snipe);
 });
 
@@ -174,6 +208,7 @@ app.put('/api/groups/:groupId/settings', (req, res) => {
     deathPoints: deathPoints || groups[groupId].settings.deathPoints
   };
   
+  saveData({ groups, snipes });
   res.json(groups[groupId].settings);
 });
 
