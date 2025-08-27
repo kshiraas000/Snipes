@@ -3,8 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } 
 import axios from 'axios';
 import { Target, Users, Trophy, History, Plus, Settings } from 'lucide-react';
 
-// API base URL
-const API_BASE = 'http://localhost:5001/api';
+// API base URL - use same domain in production, localhost in development
+const API_BASE = process.env.NODE_ENV === 'production' 
+  ? '/api' 
+  : 'http://localhost:5001/api';
 
 // Navigation Component
 const Navigation = ({ currentGroup }) => {
@@ -57,12 +59,15 @@ const GroupsList = () => {
   const fetchGroups = async () => {
     try {
       console.log('Fetching groups from:', `${API_BASE}/groups`);
+      console.log('Current environment:', process.env.NODE_ENV);
       const response = await axios.get(`${API_BASE}/groups`);
       console.log('Groups response:', response.data);
       setGroups(response.data);
     } catch (error) {
       console.error('Error fetching groups:', error);
       console.error('Error details:', error.response?.data || error.message);
+      console.error('Error status:', error.response?.status);
+      console.error('Error config:', error.config);
     } finally {
       setLoading(false);
     }
