@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Target, Users, Trophy, History, Plus, Settings } from 'lucide-react';
 
@@ -222,6 +222,7 @@ const Leaderboard = () => {
 // Record Snipe Component
 const RecordSnipe = () => {
   const { group, fetchGroup } = React.useContext(GroupContext);
+  const navigate = useNavigate();
   const [sniperId, setSniperId] = useState('');
   const [victimId, setVictimId] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -241,6 +242,8 @@ const RecordSnipe = () => {
       setSniperId('');
       setVictimId('');
       fetchGroup();
+      // Navigate back to leaderboard after successful snipe
+      navigate(`/group/${group.id}`);
     } catch (error) {
       console.error('Error recording snipe:', error);
     } finally {
