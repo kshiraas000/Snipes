@@ -151,6 +151,24 @@ app.delete('/api/groups/:groupId/players/:playerId', (req, res) => {
   res.json({ message: 'Player removed successfully' });
 });
 
+// Delete group
+app.delete('/api/groups/:groupId', (req, res) => {
+  const { groupId } = req.params;
+  
+  if (!groups[groupId]) {
+    return res.status(404).json({ error: 'Group not found' });
+  }
+  
+  // Remove the group
+  delete groups[groupId];
+  
+  // Remove all snipes for this group
+  snipes = snipes.filter(snipe => snipe.groupId !== groupId);
+  
+  saveData({ groups, snipes });
+  res.json({ message: 'Group deleted successfully' });
+});
+
 // Record a snipe
 app.post('/api/snipes', (req, res) => {
   const { groupId, sniperId, victimId } = req.body;
@@ -195,6 +213,42 @@ app.get('/api/groups/:groupId/snipes', (req, res) => {
   const { groupId } = req.params;
   const groupSnipes = snipes.filter(snipe => snipe.groupId === groupId);
   res.json(groupSnipes);
+});
+
+// Delete a snipe
+app.delete('/api/snipes/:snipeId', (req, res) => {
+  const { snipeId } = req.params;
+  
+  const snipeIndex = snipes.findIndex(snipe => snipe.id === snipeId);
+  if (snipeIndex === -1) {
+    return res.status(404).json({ error: 'Snipe not found' });
+  }
+  
+  const snipe = snipes[snipeIndex];
+  const group = groups[snipe.groupId];
+  
+  if (!group) {
+    return res.status(404).json({ error: 'Group not found' });
+  }
+  
+  // Find the sniper and victim
+  const sniper = group.players.find(p => p.id === snipe.sniperId);
+  const victim = group.players.find(p => p.id === snipe.victimId);
+  
+  if (sniper && victim) {
+    // Reverse the points
+    sniper.kills -= 1;
+    sniper.points -= group.settings.killPoints;
+    
+    victim.victims -= 1;
+    victim.points -= group.settings.deathPoints;
+  }
+  
+  // Remove the snipe
+  snipes.splice(snipeIndex, 1);
+  
+  saveData({ groups, snipes });
+  res.json({ message: 'Snipe deleted successfully' });
 });
 
 // Update group settings

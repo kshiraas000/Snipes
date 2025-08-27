@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Target, Users, Trophy, History, Plus, Settings } from 'lucide-react';
+import { Target, Users, Trophy, History, Plus, Settings, Trash2 } from 'lucide-react';
 
 // API base URL - use same domain in production, localhost in development
 const API_BASE = process.env.NODE_ENV === 'production' 
@@ -306,9 +306,10 @@ const RecordSnipe = () => {
 
 // Game History Component
 const GameHistory = () => {
-  const { group } = React.useContext(GroupContext);
+  const { group, fetchGroup } = React.useContext(GroupContext);
   const [snipes, setSnipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingSnipe, setDeletingSnipe] = useState(null);
 
   const fetchSnipes = useCallback(async () => {
     try {
@@ -324,6 +325,23 @@ const GameHistory = () => {
   useEffect(() => {
     fetchSnipes();
   }, [fetchSnipes]);
+
+  const deleteSnipe = async (snipeId) => {
+    if (!window.confirm('Are you sure you want to delete this snipe? This will reverse the points for both players.')) {
+      return;
+    }
+    
+    setDeletingSnipe(snipeId);
+    try {
+      await axios.delete(`${API_BASE}/snipes/${snipeId}`);
+      fetchSnipes();
+      fetchGroup(); // Refresh group data to update leaderboard
+    } catch (error) {
+      console.error('Error deleting snipe:', error);
+    } finally {
+      setDeletingSnipe(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -347,8 +365,19 @@ const GameHistory = () => {
                 <div>
                   <strong>{snipe.sniperName}</strong> sniped <strong>{snipe.victimName}</strong>
                 </div>
-                <div style={{ color: '#666', fontSize: '14px' }}>
-                  {new Date(snipe.timestamp).toLocaleString()}
+                <div className="flex gap-2" style={{ alignItems: 'center' }}>
+                  <div style={{ color: '#666', fontSize: '14px' }}>
+                    {new Date(snipe.timestamp).toLocaleString()}
+                  </div>
+                  <button
+                    onClick={() => deleteSnipe(snipe.id)}
+                    className="btn btn-danger"
+                    disabled={deletingSnipe === snipe.id}
+                    style={{ padding: '4px 8px', fontSize: '12px' }}
+                    title="Delete this snipe"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               </div>
             </div>
@@ -362,10 +391,12 @@ const GameHistory = () => {
 // Group Settings Component
 const GroupSettings = () => {
   const { group, fetchGroup } = React.useContext(GroupContext);
+  const navigate = useNavigate();
   const [newPlayerName, setNewPlayerName] = useState('');
   const [killPoints, setKillPoints] = useState(group.settings.killPoints);
   const [deathPoints, setDeathPoints] = useState(group.settings.deathPoints);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const addPlayer = async (e) => {
     e.preventDefault();
@@ -403,6 +434,22 @@ const GroupSettings = () => {
       console.error('Error saving settings:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteGroup = async () => {
+    if (!window.confirm(`Are you sure you want to delete "${group.name}"? This will permanently delete the group and all its data.`)) {
+      return;
+    }
+    
+    setDeleting(true);
+    try {
+      await axios.delete(`${API_BASE}/groups/${group.id}`);
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting group:', error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -469,6 +516,22 @@ const GroupSettings = () => {
         <button onClick={saveSettings} className="btn" disabled={saving}>
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
+        
+        <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e9ecef' }}>
+          <h4 style={{ color: '#dc3545', marginBottom: '16px' }}>Danger Zone</h4>
+          <button 
+            onClick={deleteGroup} 
+            className="btn btn-danger" 
+            disabled={deleting}
+            style={{ width: '100%' }}
+          >
+            <Trash2 size={20} />
+            {deleting ? 'Deleting...' : `Delete "${group.name}"`}
+          </button>
+          <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+            This will permanently delete the group and all its data. This action cannot be undone.
+          </p>
+        </div>
       </div>
     </div>
   );
