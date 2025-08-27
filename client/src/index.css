@@ -252,16 +252,19 @@ body {
 
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
+    padding: 12px;
+    max-width: 100%;
   }
   
   .card {
     padding: 16px;
+    margin-bottom: 16px;
   }
   
   .grid-2,
   .grid-3 {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .table {
@@ -271,5 +274,51 @@ body {
   .table th,
   .table td {
     padding: 8px;
+  }
+  
+  .btn {
+    width: 100%;
+    margin-bottom: 8px;
+    justify-content: center;
+  }
+  
+  .flex-between {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .leaderboard-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .leaderboard-info {
+    margin-left: 0;
+    text-align: center;
+  }
+  
+  .leaderboard-stats {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .nav-tabs {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .nav-tabs button {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    padding: 8px 4px;
   }
 }

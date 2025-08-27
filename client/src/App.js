@@ -362,18 +362,18 @@ const GameHistory = () => {
           {snipes.map((snipe) => (
             <div key={snipe.id} className="p-4" style={{ borderBottom: '1px solid #e9ecef' }}>
               <div className="flex flex-between">
-                <div>
+                <div style={{ flex: 1 }}>
                   <strong>{snipe.sniperName}</strong> sniped <strong>{snipe.victimName}</strong>
-                </div>
-                <div className="flex gap-2" style={{ alignItems: 'center' }}>
-                  <div style={{ color: '#666', fontSize: '14px' }}>
+                  <div style={{ color: '#666', fontSize: '14px', marginTop: '4px' }}>
                     {new Date(snipe.timestamp).toLocaleString()}
                   </div>
+                </div>
+                <div style={{ marginLeft: '12px' }}>
                   <button
                     onClick={() => deleteSnipe(snipe.id)}
                     className="btn btn-danger"
                     disabled={deletingSnipe === snipe.id}
-                    style={{ padding: '4px 8px', fontSize: '12px' }}
+                    style={{ padding: '6px 10px', fontSize: '12px', minWidth: 'auto' }}
                     title="Delete this snipe"
                   >
                     <Trash2 size={14} />
@@ -550,3 +550,4 @@ function App() {
 }
 
 export default App;
+
