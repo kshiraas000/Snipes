@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Target, Users, Trophy, History, Plus, Settings } from 'lucide-react';
@@ -138,11 +138,7 @@ const GroupLayout = () => {
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchGroup();
-  }, [groupId, fetchGroup]);
-
-  const fetchGroup = async () => {
+  const fetchGroup = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE}/groups/${groupId}`);
       setGroup(response.data);
@@ -151,7 +147,11 @@ const GroupLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [groupId]);
+
+  useEffect(() => {
+    fetchGroup();
+  }, [fetchGroup]);
 
   if (loading) {
     return (
@@ -302,11 +302,7 @@ const GameHistory = () => {
   const [snipes, setSnipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSnipes();
-  }, [group.id, fetchSnipes]);
-
-  const fetchSnipes = async () => {
+  const fetchSnipes = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE}/groups/${group.id}/snipes`);
       setSnipes(response.data.reverse()); // Show newest first
@@ -315,7 +311,11 @@ const GameHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [group.id]);
+
+  useEffect(() => {
+    fetchSnipes();
+  }, [fetchSnipes]);
 
   if (loading) {
     return (
