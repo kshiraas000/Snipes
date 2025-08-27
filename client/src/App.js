@@ -12,34 +12,30 @@ const API_BASE = process.env.NODE_ENV === 'production'
 const Navigation = ({ currentGroup }) => {
   return (
     <nav className="card" style={{ marginBottom: '24px' }}>
-      <div className="flex flex-between">
-        <div className="flex gap-4">
-          <Link to="/" className="btn btn-secondary">
-            <Users size={20} />
-            Groups
-          </Link>
-          {currentGroup && (
-            <>
-              <Link to={`/group/${currentGroup.id}`} className="btn btn-secondary">
-                <Trophy size={20} />
-                Leaderboard
-              </Link>
-              <Link to={`/group/${currentGroup.id}/snipes`} className="btn btn-secondary">
-                <Target size={20} />
-                Record Snipe
-              </Link>
-              <Link to={`/group/${currentGroup.id}/history`} className="btn btn-secondary">
-                <History size={20} />
-                History
-              </Link>
-            </>
-          )}
-        </div>
+      <div className="nav-grid">
+        <Link to="/" className="nav-item btn btn-secondary">
+          <Users size={18} />
+          <span>Groups</span>
+        </Link>
         {currentGroup && (
-          <Link to={`/group/${currentGroup.id}/settings`} className="btn btn-secondary">
-            <Settings size={20} />
-            Settings
-          </Link>
+          <>
+            <Link to={`/group/${currentGroup.id}`} className="nav-item btn btn-secondary">
+              <Trophy size={18} />
+              <span>Leaderboard</span>
+            </Link>
+            <Link to={`/group/${currentGroup.id}/snipes`} className="nav-item btn btn-secondary">
+              <Target size={18} />
+              <span>Record Snipe</span>
+            </Link>
+            <Link to={`/group/${currentGroup.id}/history`} className="nav-item btn btn-secondary">
+              <History size={18} />
+              <span>History</span>
+            </Link>
+            <Link to={`/group/${currentGroup.id}/settings`} className="nav-item btn btn-secondary">
+              <Settings size={18} />
+              <span>Settings</span>
+            </Link>
+          </>
         )}
       </div>
     </nav>
@@ -106,7 +102,7 @@ const GroupsList = () => {
         <p className="text-center mb-4">Track your campus photo snipes and compete on the leaderboard!</p>
         
         <form onSubmit={createGroup} className="mb-4">
-          <div className="flex gap-4">
+          <div className="form-row">
             <input
               type="text"
               className="form-control"
@@ -115,7 +111,7 @@ const GroupsList = () => {
               onChange={(e) => setNewGroupName(e.target.value)}
             />
             <button type="submit" className="btn">
-              <Plus size={20} />
+              <Plus size={18} />
               Create Group
             </button>
           </div>
@@ -459,7 +455,7 @@ const GroupSettings = () => {
         <h3 className="mb-4">Player Management</h3>
         
         <form onSubmit={addPlayer} className="mb-4">
-          <div className="flex gap-4">
+          <div className="form-row">
             <input
               type="text"
               className="form-control"
@@ -468,7 +464,7 @@ const GroupSettings = () => {
               onChange={(e) => setNewPlayerName(e.target.value)}
             />
             <button type="submit" className="btn">
-              <Plus size={20} />
+              <Plus size={18} />
               Add Player
             </button>
           </div>
